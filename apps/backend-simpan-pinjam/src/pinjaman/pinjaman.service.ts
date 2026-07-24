@@ -226,9 +226,16 @@ export class PinjamanService {
     }
 
     async update(id: number, updatePinjamanDto: UpdatePinjamanDto) {
+        const sanitizedData = Object.entries(updatePinjamanDto).reduce((acc, [key, value]) => {
+            if (value !== undefined && value !== null) {
+                acc[key] = value
+            }
+            return acc
+        }, {} as Record<string, any>)
+
         return await this.prisma.pinjaman.update({
             where: { id },
-            data: updatePinjamanDto,
+            data: sanitizedData,
         });
     }
 

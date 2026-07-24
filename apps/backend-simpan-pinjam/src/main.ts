@@ -26,6 +26,22 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(process.env.PORT ?? 3000);
+  const requestedPort = Number(process.env.PORT ?? 3001);
+  let port = requestedPort;
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    try {
+      await app.listen(port);
+      console.log(`Application is listening on port ${port}`);
+      return;
+    } catch (error: any) {
+      if (error?.code === 'EADDRINUSE' && attempt < 9) {
+        port += 1;
+        console.warn(`Port ${port - 1} is already in use. Trying port ${port}...`);
+      } else {
+        throw error;
+      }
+    }
+  }
 }
 bootstrap();

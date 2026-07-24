@@ -8,21 +8,25 @@ const actionCards = [
     icon: Database,
     title: 'Data Simpanan',
     description: 'Kelola simpanan nasabah',
+    href: '/simpanan/data',
   },
   {
     icon: ArrowLeftRight,
     title: 'Transaksi Simpanan',
     description: 'Catat setoran & penarikan',
+    href: '/simpanan/transaksi',
   },
   {
     icon: BookOpen,
     title: 'Buku Tabungan',
     description: 'Lihat riwayat transaksi',
+    href: '/simpanan/buku-tabungan',
   },
   {
     icon: Landmark,
     title: 'Deposito',
     description: 'Kelola simpanan berjangka',
+    href: '/simpanan/deposito',
   },
 ]
 
@@ -46,10 +50,9 @@ export default function SimpananPage() {
           {actionCards.map((card) => {
             const Icon = card.icon
             return (
-              <button
+              <a
                 key={card.title}
-                type="button"
-                onClick={() => alert(`Fitur ${card.title} akan segera tersedia`)}
+                href={card.href}
                 className="group flex items-start space-x-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
@@ -59,7 +62,7 @@ export default function SimpananPage() {
                   <p className="text-sm font-semibold text-slate-900">{card.title}</p>
                   <p className="mt-1 text-xs text-slate-500">{card.description}</p>
                 </div>
-              </button>
+              </a>
             )
           })}
         </section>

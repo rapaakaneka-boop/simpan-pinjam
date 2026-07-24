@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import {
   PlusCircle,
   ShieldCheck,
@@ -26,218 +27,61 @@ const actionCards = [
     icon: ShieldCheck,
     title: 'Analisis & Skor Risiko',
     description: 'Analisis risiko otomatis berbasis data',
+    href: '/pinjaman/analisis-skor-risiko',
   },
   {
     icon: Search,
     title: 'Pre-Loan Checking',
     description: 'Cek kelayakan awal sebelum pengajuan',
+    href: '/pinjaman/pre-loan-checking',
   },
   {
     icon: CreditCard,
     title: 'Pembayaran',
     description: 'Catat pembayaran cicilan nasabah',
+    href: '/pinjaman/pembayaran',
   },
 ]
 
-const initialPengajuanList = [
-  {
-    id: 1,
-    nama: 'Budi Santoso',
-    nik: '3274012304100012',
-    rekening: '123-456-7890',
-    hp: '+62 812-3456-7890',
-    email: 'budi.santoso@email.com',
-    lahir: '15 Januari 1988',
-    alamat: 'Jl. M.H. Thamrin No. 45, Jakarta Pusat',
-    ibu: {
-      nama: 'Siti Aminah',
-      lahir: '20 Mei 1960',
-      alamat: 'Jl. Kebon Kacang Raya No. 10, Jakarta Pusat',
-    },
-    pekerjaan: 'Wiraswasta',
-    penghasilan: 10000000,
-    cicilan: 850000,
-    riwayatPembayaran: 'Lancar',
-    rasio: 8.5,
-    bi: {
-      status: 'K1',
-      tempat: 1,
-      totalHutang: 0,
-      adaTunggakan: false,
-      catatan: '',
-    },
-    jumlah: 10000000,
-    tenor: '12 bulan',
-    bunga: '12',
-    tujuan: 'Modal usaha kecil',
-    slik: 'K1',
-    jumlahLembaga: '1',
-    totalHutangLain: '0',
-    adaTunggakan: 'Tidak Ada',
-    catatan: '',
-    risiko: 'Rendah',
-    risk: 'Rendah',
-    rekomendasi: 'Approve',
-  },
-  {
-    id: 2,
-    nama: 'Siti Rahayu',
-    nik: '3274012304100020',
-    rekening: '123-456-7891',
-    hp: '+62 813-4567-8901',
-    email: 'siti.rahayu@email.com',
-    lahir: '8 Februari 1990',
-    alamat: 'Jl. Melati No. 12, Bekasi',
-    ibu: {
-      nama: 'Ratna Sari',
-      lahir: '14 Februari 1965',
-      alamat: 'Jl. Melati No. 12, Bekasi',
-    },
-    pekerjaan: 'PNS',
-    penghasilan: 12000000,
-    cicilan: 4200000,
-    riwayatPembayaran: 'Lancar',
-    rasio: 35,
-    bi: {
-      status: 'K2',
-      tempat: 2,
-      totalHutang: 8000000,
-      adaTunggakan: false,
-      catatan: 'Pembayaran stabil meskipun ada pinjaman tambahan.',
-    },
-    jumlah: 15000000,
-    tenor: '18 bulan',
-    bunga: '11',
-    tujuan: 'Renovasi rumah',
-    slik: 'K2',
-    jumlahLembaga: '2',
-    totalHutangLain: '8000000',
-    adaTunggakan: 'Tidak Ada',
-    catatan: 'Pembayaran stabil.',
-    risiko: 'Sedang',
-    risk: 'Sedang',
-    rekomendasi: 'Review',
-  },
-  {
-    id: 3,
-    nama: 'Andi Wijaya',
-    nik: '3274012304100038',
-    rekening: '123-456-7892',
-    hp: '+62 814-5678-9012',
-    email: 'andi.wijaya@email.com',
-    lahir: '23 Maret 1985',
-    alamat: 'Jl. Raya Bogor No. 75, Depok',
-    ibu: {
-      nama: 'Lina Wahyuni',
-      lahir: '12 Maret 1960',
-      alamat: 'Jl. Raya Bogor No. 75, Depok',
-    },
-    pekerjaan: 'Freelance',
-    penghasilan: 7000000,
-    cicilan: 4200000,
-    riwayatPembayaran: 'Telat',
-    rasio: 60,
-    bi: {
-      status: 'K4',
-      tempat: 3,
-      totalHutang: 15000000,
-      adaTunggakan: true,
-      catatan: 'Terdapat tunggakan 2 bulan.',
-    },
-    jumlah: 8000000,
-    tenor: '12 bulan',
-    bunga: '14',
-    tujuan: 'Modal usaha dagang',
-    slik: 'K4',
-    jumlahLembaga: '3',
-    totalHutangLain: '15000000',
-    adaTunggakan: 'Ada Tunggakan',
-    catatan: 'Terdapat tunggakan 2 bulan.',
-    risiko: 'Tinggi',
-    risk: 'Tinggi',
-    rekomendasi: 'Reject',
-  },
-  {
-    id: 4,
-    nama: 'Dewi Lestari',
-    nik: '3274012304100046',
-    rekening: '123-456-7893',
-    hp: '+62 815-6789-0123',
-    email: 'dewi.lestari@email.com',
-    lahir: '2 April 1992',
-    alamat: 'Jl. Kenanga No. 18, Tangerang',
-    ibu: {
-      nama: 'Maya Suhartini',
-      lahir: '5 Mei 1968',
-      alamat: 'Jl. Kenanga No. 18, Tangerang',
-    },
-    pekerjaan: 'Wiraswasta',
-    penghasilan: 9000000,
-    cicilan: 3600000,
-    riwayatPembayaran: 'Lancar',
-    rasio: 40,
-    bi: {
-      status: 'K2',
-      tempat: 2,
-      totalHutang: 5000000,
-      adaTunggakan: false,
-      catatan: 'Riwayat pembayaran cukup baik.',
-    },
-    jumlah: 20000000,
-    tenor: '24 bulan',
-    bunga: '12',
-    tujuan: 'Investasi warung',
-    slik: 'K2',
-    jumlahLembaga: '2',
-    totalHutangLain: '5000000',
-    adaTunggakan: 'Tidak Ada',
-    catatan: 'Riwayat pembayaran cukup baik.',
-    risiko: 'Sedang',
-    risk: 'Sedang',
-    rekomendasi: 'Review',
-  },
-  {
-    id: 5,
-    nama: 'Rudi Hermawan',
-    nik: '3274012304100054',
-    rekening: '123-456-7894',
-    hp: '+62 816-7890-1234',
-    email: 'rudi.hermawan@email.com',
-    lahir: '10 Mei 1983',
-    alamat: 'Jl. Melur No. 5, Bandung',
-    ibu: {
-      nama: 'Sri Wulandari',
-      lahir: '30 Mei 1958',
-      alamat: 'Jl. Melur No. 5, Bandung',
-    },
-    pekerjaan: 'Petani',
-    penghasilan: 8500000,
-    cicilan: 720000,
-    riwayatPembayaran: 'Lancar',
-    rasio: 8.5,
-    bi: {
-      status: 'K1',
-      tempat: 1,
-      totalHutang: 0,
-      adaTunggakan: false,
-      catatan: '',
-    },
-    jumlah: 12000000,
-    tenor: '18 bulan',
-    bunga: '10',
-    tujuan: 'Peningkatan hasil panen',
-    slik: 'K1',
-    jumlahLembaga: '1',
-    totalHutangLain: '0',
-    adaTunggakan: 'Tidak Ada',
-    catatan: '',
-    risiko: 'Rendah',
-    risk: 'Rendah',
-    rekomendasi: 'Approve',
-  },
-]
-
-type NasabahDetail = typeof initialPengajuanList[number]
+type NasabahDetail = {
+  id: number
+  nama: string
+  nik: string
+  rekening: string
+  hp: string
+  email: string
+  lahir: string
+  alamat: string
+  ibu: {
+    nama: string
+    lahir: string
+    alamat: string
+  }
+  pekerjaan: string
+  penghasilan: number
+  cicilan: number
+  riwayatPembayaran: string
+  rasio: number
+  bi: {
+    status: string
+    tempat: number
+    totalHutang: number
+    adaTunggakan: boolean
+    catatan: string
+  }
+  jumlah: number
+  tenor: number
+  bunga: string
+  tujuan: string
+  slik: string
+  jumlahLembaga: string
+  totalHutangLain: string
+  adaTunggakan: string
+  catatan: string
+  risiko: string
+  risk: string
+  rekomendasi: string
+}
 
 const summaryRows = [
   {
@@ -299,15 +143,20 @@ export default function PinjamanPage() {
     bunga: '',
     tujuan: '',
   })
-  const [pengajuanList, setPengajuanList] = useState(initialPengajuanList)
+  const [pengajuanList, setPengajuanList] = useState<NasabahDetail[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [editForm, setEditForm] = useState<NasabahDetail | null>(null)
 
   useEffect(() => {
     const loadPinjaman = async () => {
+      setIsLoading(true)
+      setFetchError(null)
+
       try {
         const data = await api.getPinjaman()
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           const mapped = data.map((item: any, index: number) => ({
             id: item.id ?? index + 1,
             nama: item.nama ?? item.nasabah?.nama ?? '',
@@ -335,7 +184,7 @@ export default function PinjamanPage() {
               catatan: item.catatan ?? item.bi?.catatan ?? '',
             },
             jumlah: Number(item.jumlah ?? item.jumlahPinjaman ?? 0),
-            tenor: item.tenor ?? '12',
+            tenor: Number(item.tenor ?? 12),
             bunga: item.bunga ?? '',
             tujuan: item.tujuan ?? '',
             slik: item.slik ?? item.bi?.status ?? 'K1',
@@ -348,9 +197,15 @@ export default function PinjamanPage() {
             rekomendasi: item.rekomendasi ?? 'Approve',
           }))
           setPengajuanList(mapped)
+        } else {
+          setPengajuanList([])
         }
       } catch (error) {
         console.error('Gagal memuat data pinjaman', error)
+        setFetchError(error instanceof Error ? error.message : 'Gagal memuat data pinjaman')
+        setPengajuanList([])
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -427,40 +282,19 @@ export default function PinjamanPage() {
     const payload = {
       nama: pengajuanForm.nama,
       nik: pengajuanForm.nik,
-      rekening: pengajuanForm.noRekening,
-      hp: pengajuanForm.noHp,
       email: pengajuanForm.email,
-      lahir: pengajuanForm.tanggalLahir,
-      alamat: pengajuanForm.alamat,
-      ibu: {
-        nama: pengajuanForm.namaIbu,
-        lahir: pengajuanForm.tanggalLahirIbu,
-        alamat: pengajuanForm.alamatIbu,
-      },
-      pekerjaan: pengajuanForm.pekerjaan,
       penghasilan,
       cicilan,
-      riwayatPembayaran: pengajuanForm.riwayat,
-      rasio: Number(rasio.toFixed(1)),
-      bi: {
-        status: pengajuanForm.slik,
-        tempat: Number(pengajuanForm.jumlahLembaga),
-        totalHutang: Number(pengajuanForm.totalHutangLain),
-        adaTunggakan: pengajuanForm.adaTunggakan === 'Ada Tunggakan',
-        catatan: pengajuanForm.catatan,
-      },
       jumlah: jumlahPinjaman,
-      tenor: formatTenor(pengajuanForm.tenor),
-      bunga: pengajuanForm.bunga,
+      tenor: Number(pengajuanForm.tenor || 0),
+      bunga: Number(pengajuanForm.bunga || 0),
       tujuan: pengajuanForm.tujuan,
-      slik: pengajuanForm.slik,
-      jumlahLembaga: pengajuanForm.jumlahLembaga,
-      totalHutangLain: pengajuanForm.totalHutangLain,
-      adaTunggakan: pengajuanForm.adaTunggakan,
-      catatan: pengajuanForm.catatan,
       risiko: calculatedRisk,
-      risk: calculatedRisk,
       rekomendasi: recommendation,
+      jumlahPinjaman: jumlahPinjaman,
+      tenorBulan: Number(pengajuanForm.tenor || 0),
+      sukuBunga: Number(pengajuanForm.bunga || 0),
+      jenisBunga: 'efektif',
     }
 
     try {
@@ -493,7 +327,7 @@ export default function PinjamanPage() {
           catatan: pengajuanForm.catatan,
         },
         jumlah: jumlahPinjaman,
-        tenor: formatTenor(pengajuanForm.tenor),
+        tenor: Number(pengajuanForm.tenor),
         bunga: pengajuanForm.bunga,
         tujuan: pengajuanForm.tujuan,
         slik: pengajuanForm.slik,
@@ -547,7 +381,7 @@ export default function PinjamanPage() {
     const cicilan = Number(editForm.cicilan)
     const newRasio = penghasilan > 0 ? Number(((cicilan / penghasilan) * 100).toFixed(1)) : 0
     let calculatedRisk = 'Rendah'
-    
+
 
     if (['K3', 'K4', 'K5'].includes(editForm.slik)) {
       calculatedRisk = 'Tinggi'
@@ -559,21 +393,40 @@ export default function PinjamanPage() {
 
     const recommendation = calculatedRisk === 'Rendah' ? 'Approve' : calculatedRisk === 'Sedang' ? 'Review' : 'Reject'
 
+    const jumlahPinjaman = Number(editForm.jumlah)
+    const tenor = Number(editForm.tenor)
+    const sukuBunga = Number(editForm.bunga || 0)
+
+    if (isNaN(jumlahPinjaman) || jumlahPinjaman <= 0) {
+      alert('Jumlah pinjaman tidak valid.')
+      return
+    }
+
+    if (isNaN(tenor) || tenor <= 0) {
+      alert('Tenor tidak valid.')
+      return
+    }
+
+    if (isNaN(sukuBunga) || sukuBunga < 0) {
+      alert('Suku bunga tidak valid.')
+      return
+    }
+
+    const monthlyRate = sukuBunga / 100 / 12
+    const cicilanBulanan = tenor > 0
+      ? (jumlahPinjaman * monthlyRate * Math.pow(1 + monthlyRate, tenor)) /
+      (Math.pow(1 + monthlyRate, tenor) - 1)
+      : 0
+    const totalBunga = Math.round((cicilanBulanan * tenor - jumlahPinjaman) * 100) / 100
+    const totalPembayaran = Math.round((jumlahPinjaman + totalBunga) * 100) / 100
+
     const payload = {
-      ...editForm,
-      penghasilan,
-      cicilan,
-      rasio: newRasio,
-      bi: {
-        ...editForm.bi,
-        totalHutang: Number(editForm.totalHutangLain),
-        tempat: Number(editForm.jumlahLembaga),
-        adaTunggakan: editForm.adaTunggakan === 'Ada Tunggakan',
-      },
-      jumlah: Number(editForm.jumlah),
-      risiko: calculatedRisk,
-      risk: calculatedRisk,
-      rekomendasi: recommendation,
+      jumlahPinjaman,
+      tenor,
+      sukuBunga,
+      cicilanBulanan: Math.round(cicilanBulanan * 100) / 100,
+      totalBunga,
+      totalPembayaran,
     }
 
     try {
@@ -582,9 +435,15 @@ export default function PinjamanPage() {
         prev.map((item) =>
           item.id === editForm.id
             ? {
-                ...payload,
-                id: editForm.id,
-              }
+              ...item,
+              jumlah: jumlahPinjaman,
+              tenor,
+              bunga: String(sukuBunga),
+              cicilan: Number(editForm.cicilan),
+              rasio: newRasio,
+              risiko: calculatedRisk,
+              rekomendasi: recommendation,
+            }
             : item
         )
       )
@@ -628,7 +487,12 @@ export default function PinjamanPage() {
     return `${base} bg-red-50 text-red-600`
   }
 
-  const formatTenor = (tenor: string) => (tenor.includes('bulan') ? tenor : `${tenor} bulan`)
+  const formatTenor = (tenor: string | number) =>
+    typeof tenor === 'number'
+      ? `${tenor} bulan`
+      : tenor.includes('bulan')
+        ? tenor
+        : `${tenor} bulan`
 
   const getRatioColor = (ratio: number) => {
     if (ratio <= 30) return 'bg-emerald-500'
@@ -650,20 +514,36 @@ export default function PinjamanPage() {
           {actionCards.map((card) => {
             const Icon = card.icon
             return (
-              <button
-                key={card.title}
-                type="button"
-                onClick={() => (card.title === 'Pengajuan Baru' ? openPengajuanModal() : showComingSoon(card.title))}
-                className="group flex items-start space-x-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                  <Icon className="h-6 w-6" />
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-slate-900">{card.title}</p>
-                  <p className="mt-1 text-xs text-slate-500">{card.description}</p>
-                </div>
-              </button>
+              <div key={card.title}>
+                {card.href ? (
+                  <Link
+                    href={card.href}
+                    className="group flex items-start space-x-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-slate-900">{card.title}</p>
+                      <p className="mt-1 text-xs text-slate-500">{card.description}</p>
+                    </div>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={openPengajuanModal}
+                    className="group flex items-start space-x-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-slate-900">{card.title}</p>
+                      <p className="mt-1 text-xs text-slate-500">{card.description}</p>
+                    </div>
+                  </button>
+                )}
+              </div>
             )
           })}
         </section>
@@ -674,8 +554,9 @@ export default function PinjamanPage() {
               <h3 className="text-lg font-bold text-slate-900">Pengajuan Terbaru</h3>
               <button
                 type="button"
-                onClick={() => openModal(pengajuanList[0] ?? initialPengajuanList[0]!)}
-                className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700"
+                onClick={() => pengajuanList[0] && openModal(pengajuanList[0])}
+                disabled={pengajuanList.length === 0}
+                className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 <User className="h-4 w-4" />
                 Data Nasabah
@@ -694,28 +575,35 @@ export default function PinjamanPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {pengajuanList.map((row) => {
-                    const rekomendasiColor = row.rekomendasi === 'Approve'
-                      ? 'text-blue-600'
-                      : row.rekomendasi === 'Review'
-                      ? 'text-slate-500'
-                      : 'text-red-600'
-                    return (
-                      <tr
-                        key={row.id}
-                        className="cursor-pointer transition hover:bg-slate-50"
-                        onClick={() => openModal(row)}
-                      >
-                        <td className="px-3 py-4 font-medium text-slate-900">{row.nama}</td>
-                        <td className="px-3 py-4">{formatCurrency(row.jumlah)}</td>
-                        <td className="px-3 py-4">{row.tenor}</td>
-                        <td className="px-3 py-4">
-                          <span className={renderRiskBadge(row.risiko)}>{row.risiko}</span>
-                        </td>
-                        <td className={`px-3 py-4 font-semibold ${rekomendasiColor}`}>{row.rekomendasi}</td>
-                      </tr>
-                    )
-                  })}
+                  {pengajuanList.length === 0 && !isLoading ? (
+                    <tr>
+                      <td colSpan={5} className="px-3 py-4 text-center text-slate-500">
+                        {fetchError ? fetchError : 'Tidak ada data pinjaman.'}
+                      </td>
+                    </tr>
+                  ) : (
+                    pengajuanList.map((row, index) => {
+                      const rekomendasiColor = row.rekomendasi === 'Approve'
+                        ? 'text-blue-600'
+                        : row.rekomendasi === 'Review'
+                          ? 'text-slate-500'
+                          : 'text-red-600'
+                      return (
+                        <tr
+                          key={`${row.id}-${row.nik}-${index}`}
+                          className="cursor-pointer transition hover:bg-slate-50"
+                          onClick={() => openModal(row)}
+                        >
+                          <td className="px-3 py-4 font-medium text-slate-900">{row.nama}</td>
+                          <td className="px-3 py-4">{formatCurrency(row.jumlah)}</td>
+                          <td className="px-3 py-4">{row.tenor}</td>
+                          <td className="px-3 py-4">
+                            <span className={renderRiskBadge(row.risiko)}>{row.risiko}</span>
+                          </td>
+                          <td className={`px-3 py-4 font-semibold ${rekomendasiColor}`}>{row.rekomendasi}</td>
+                        </tr>
+                      )
+                    }))}
                 </tbody>
               </table>
             </div>
@@ -1674,8 +1562,8 @@ export default function PinjamanPage() {
                     </label>
                     <select
                       id="edit-tenor"
-                      value={editForm.tenor}
-                      onChange={(event) => setEditForm((current) => current ? { ...current, tenor: event.target.value } : current)}
+                      value={String(editForm.tenor)}
+                      onChange={(event) => setEditForm((current) => current ? { ...current, tenor: Number(event.target.value) } : current)}
                       className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                     >
                       <option value="6">6 bulan</option>
@@ -1759,14 +1647,14 @@ export default function PinjamanPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {pengajuanList.map((row) => {
+                    {pengajuanList.map((row, index) => {
                       const rekomendasiColor = row.rekomendasi === 'Approve'
                         ? 'text-blue-600'
                         : row.rekomendasi === 'Review'
-                        ? 'text-slate-500'
-                        : 'text-red-600'
+                          ? 'text-slate-500'
+                          : 'text-red-600'
                       return (
-                        <tr key={row.id} className="hover:bg-slate-50">
+                        <tr key={`${row.id}-${row.nik}-${index}`} className="hover:bg-slate-50">
                           <td className="px-3 py-4 font-medium text-slate-900">{row.nama}</td>
                           <td className="px-3 py-4">{formatCurrency(row.jumlah)}</td>
                           <td className="px-3 py-4">{row.tenor}</td>

@@ -1,3 +1,4 @@
+import { NasabahService } from '../nasabah/nasabah.service';
 import { PinjamanService } from './pinjaman.service';
 
 describe('PinjamanService', () => {
@@ -40,5 +41,44 @@ describe('PinjamanService', () => {
             nama: 'Test User',
             nik: '1234567890123456',
         });
+    });
+
+    it('should create a nasabah with the fields used by the frontend', async () => {
+        const prisma = {
+            nasabah: {
+                create: jest.fn().mockResolvedValue({ id: 11, nama: 'Uji Nasabah', nik: '1234567890123456' }),
+            },
+        };
+
+        const service = new NasabahService(prisma as any);
+
+        await service.create({
+            nama: 'Uji Nasabah',
+            nik: '1234567890123456',
+            noRek: '123456',
+            hp: '081234567890',
+            email: 'uji@example.com',
+            lahir: '2000-01-01',
+            alamat: 'Jl. Uji',
+            ibu: { nama: 'Ibu Uji', lahir: '1970-01-01', alamat: 'Jl. Ibu' },
+            kerja: 'PNS',
+            gaji: 5000000,
+            cicilan: 1000000,
+            riwayat: 'Lancar',
+            slik: 'K1',
+            hutangLain: 0,
+            lembaga: 0,
+            tunggakan: false,
+            catatan: 'test',
+        } as any);
+
+        expect(prisma.nasabah.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    nama: 'Uji Nasabah',
+                    nik: '1234567890123456',
+                }),
+            }),
+        );
     });
 });

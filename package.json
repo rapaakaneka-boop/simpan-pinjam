@@ -5,6 +5,11 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "start": "npm run start:backend",
+    "start:backend": "npm --workspace apps/backend-simpan-pinjam run start:dev",
+    "start:web": "npm --workspace apps/web run dev -- --port 3003",
+    "dev:all": "concurrently --success never \"npm run start:backend\" \"npm run start:web\" \"npm run open-browser\"",
+    "open-browser": "wait-on http://localhost:3003 && cmd /c start \"\" microsoft-edge:http://localhost:3003",
     "lint": "turbo lint",
     "format": "turbo format",
     "typecheck": "turbo typecheck"
@@ -12,10 +17,13 @@
   "devDependencies": {
     "@workspace/eslint-config": "*",
     "@workspace/typescript-config": "*",
+    "concurrently": "^8.2.2",
+    "open-cli": "^7.1.0",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "turbo": "^2.9.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^7.2.0"
   },
   "packageManager": "npm@11.13.0",
   "engines": {

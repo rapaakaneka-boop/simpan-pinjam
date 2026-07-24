@@ -1,4 +1,5 @@
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://backend-simpan-pinjam-production.up.railway.app').replace(/\/$/, '')
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005').replace(/\/$/, '')
+const DEV_ADMIN_CREDENTIALS = { username: 'admin', password: 'admin123' }
 
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null
@@ -17,20 +18,52 @@ export function removeToken(): void {
   document.cookie = 'sp_token=; path=/; max-age=0'
 }
 
-export async function apiFetch(endpoint: string, options: RequestInit = {}) {
-  const token = getToken()
-  const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  })
-
+async function parseResponseBody(res: Response) {
   const contentType = res.headers.get('content-type') || ''
   const hasJsonBody = contentType.includes('application/json')
-  const responseBody = hasJsonBody ? await res.json().catch(() => null) : await res.text().catch(() => null)
+  return hasJsonBody ? await res.json().catch(() => null) : await res.text().catch(() => null)
+}
+
+export async function apiFetch(endpoint: string, options: RequestInit = {}) {
+  const token = getToken()
+  const headers = new Headers(options.headers)
+  headers.set('Content-Type', 'application/json')
+
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
+
+  let res = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  })
+
+  let responseBody = await parseResponseBody(res)
+
+  if (res.status === 401 && endpoint !== '/auth/login' && process.env.NODE_ENV !== 'production') {
+    try {
+      const loginRes = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(DEV_ADMIN_CREDENTIALS),
+      })
+
+      const loginBody = await parseResponseBody(loginRes)
+      const loginToken = loginBody?.token || loginBody?.access_token
+
+      if (loginRes.ok && loginToken) {
+        setToken(loginToken)
+        headers.set('Authorization', `Bearer ${loginToken}`)
+        res = await fetch(`${API_BASE_URL}${endpoint}`, {
+          ...options,
+          headers,
+        })
+        responseBody = await parseResponseBody(res)
+      }
+    } catch (error) {
+      console.error('Gagal melakukan auto-login untuk API lokal', error)
+    }
+  }
 
   if (!res.ok) {
     const errorMessage =

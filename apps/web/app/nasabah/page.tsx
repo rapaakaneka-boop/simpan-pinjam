@@ -149,7 +149,34 @@ export default function NasabahPage() {
       try {
         const data = await api.getNasabah()
         if (Array.isArray(data)) {
-          setNasabahList(data as Nasabah[])
+          const mappedData = data.map((item: any) => ({
+            id: String(item.id ?? crypto.randomUUID()),
+            nama: item.nama ?? 'Nama belum tersedia',
+            nik: item.nik ?? '',
+            noRek: item.noRek ?? item.rekening ?? '-',
+            hp: item.hp ?? item.noHp ?? '-',
+            email: item.email ?? '-',
+            lahir: item.lahir ?? '-',
+            alamat: item.alamat ?? '-',
+            ibu: {
+              nama: item.ibu?.nama ?? item.ibuNama ?? '-',
+              lahir: item.ibu?.lahir ?? item.ibuLahir ?? '-',
+              alamat: item.ibu?.alamat ?? item.ibuAlamat ?? '-',
+            },
+            kerja: item.pekerjaan ?? item.kerja ?? 'Lainnya',
+            gaji: Number(item.penghasilan ?? item.gaji ?? 0),
+            cicilan: Number(item.cicilan ?? item.cicilanBulanan ?? 0),
+            riwayat: item.riwayatPembayaran === 'telat' ? 'Telat' : 'Lancar',
+            slik: item.slik ?? 'K1',
+            hutangLain: Number(item.hutangLain ?? item.totalHutangLain ?? 0),
+            lembaga: Number(item.lembaga ?? item.jumlahLembaga ?? 0),
+            tunggakan: Boolean(item.tunggakan ?? item.adaTunggakan ?? false),
+            catatan: item.catatan ?? item.keterangan ?? '',
+            rasio: Number(item.rasio ?? (Number(item.cicilan ?? item.cicilanBulanan ?? 0) > 0 && Number(item.penghasilan ?? item.gaji ?? 0) > 0 ? (Number(item.cicilan ?? item.cicilanBulanan ?? 0) / Number(item.penghasilan ?? item.gaji ?? 0)) * 100 : 0)),
+            risiko: item.risiko ?? 'Rendah',
+          })) as Nasabah[]
+
+          setNasabahList(mappedData)
         }
       } catch (error) {
         console.error('Gagal memuat data nasabah', error)
@@ -234,38 +261,38 @@ export default function NasabahPage() {
         const risiko = isHighBi
           ? 'Tinggi'
           : status === 'K2'
-          ? rounded > 30
-            ? 'Tinggi'
-            : 'Sedang'
-          : status === 'K1'
-          ? rounded <= 30
-            ? 'Rendah'
-            : rounded <= 50
-            ? 'Sedang'
-            : 'Tinggi'
-          : 'Tinggi'
+            ? rounded > 30
+              ? 'Tinggi'
+              : 'Sedang'
+            : status === 'K1'
+              ? rounded <= 30
+                ? 'Rendah'
+                : rounded <= 50
+                  ? 'Sedang'
+                  : 'Tinggi'
+              : 'Tinggi'
 
         const biStatusLabel =
           status === 'K1'
             ? 'K1 Lancar'
             : status === 'K2'
-            ? 'K2 DPK'
-            : status === 'K3'
-            ? 'K3 Kurang Lancar'
-            : status === 'K4'
-            ? 'K4 Diragukan'
-            : 'K5 Macet'
+              ? 'K2 DPK'
+              : status === 'K3'
+                ? 'K3 Kurang Lancar'
+                : status === 'K4'
+                  ? 'K4 Diragukan'
+                  : 'K5 Macet'
 
         const biBadgeClass =
           status === 'K1'
             ? 'bg-emerald-400 text-slate-950'
             : status === 'K2'
-            ? 'bg-amber-400 text-slate-950'
-            : status === 'K3'
-            ? 'bg-orange-500 text-slate-950'
-            : status === 'K4'
-            ? 'bg-rose-500 text-slate-950'
-            : 'bg-rose-900 text-slate-100'
+              ? 'bg-amber-400 text-slate-950'
+              : status === 'K3'
+                ? 'bg-orange-500 text-slate-950'
+                : status === 'K4'
+                  ? 'bg-rose-500 text-slate-950'
+                  : 'bg-rose-900 text-slate-100'
 
         return { ...item, rasio: rounded, risiko, biStatusLabel, biBadgeClass }
       }),
@@ -602,8 +629,8 @@ export default function NasabahPage() {
                         row.risiko === 'Rendah'
                           ? 'bg-emerald-500'
                           : row.risiko === 'Sedang'
-                          ? 'bg-amber-400'
-                          : 'bg-rose-500'
+                            ? 'bg-amber-400'
+                            : 'bg-rose-500'
 
                       return (
                         <tr
@@ -636,13 +663,12 @@ export default function NasabahPage() {
                           </td>
                           <td className="px-3 py-2">
                             <span
-                              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold text-slate-950 ${
-                                row.risiko === 'Rendah'
+                              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold text-slate-950 ${row.risiko === 'Rendah'
                                   ? 'bg-emerald-400'
                                   : row.risiko === 'Sedang'
-                                  ? 'bg-amber-300'
-                                  : 'bg-rose-400'
-                              }`}
+                                    ? 'bg-amber-300'
+                                    : 'bg-rose-400'
+                                }`}
                             >
                               {row.risiko}
                             </span>

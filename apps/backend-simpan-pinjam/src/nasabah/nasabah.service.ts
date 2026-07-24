@@ -1,17 +1,52 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateNasabahDto } from './dto/create-nasabah.dto';
 import { UpdateNasabahDto } from './dto/update-nasabah.dto';
 import { PaginatedNasabahResponse, ListNasabahDto } from './dto/list-nasabah.dto';
+
+function normalizeNasabahPayload(payload: any) {
+    const data = payload || {};
+    const nama = data.nama ?? data.name ?? data.namaLengkap;
+    const nik = data.nik ?? data.NIK;
+    const pekerjaan = data.pekerjaan ?? data.kerja ?? 'Tidak tercantum';
+    const penghasilan = Number(data.penghasilan ?? data.gaji ?? 0);
+    const riwayatPembayaran = data.riwayatPembayaran ?? data.riwayat ?? 'Belum ada data';
+    const jumlahTanggungan = data.jumlahTanggungan ?? data.jumlahTanggungan ?? null;
+
+    return {
+        nama,
+        nik,
+        pekerjaan,
+        penghasilan,
+        riwayatPembayaran,
+        jumlahTanggungan,
+    };
+}
 
 @Injectable()
 export class NasabahService {
     constructor(private prisma: PrismaService) { }
 
     async create(createNasabahDto: CreateNasabahDto) {
-        return await this.prisma.nasabah.create({
-            data: createNasabahDto,
-        });
+        const normalized = normalizeNasabahPayload(createNasabahDto);
+
+        try {
+            return await this.prisma.nasabah.create({
+                data: {
+                    nama: normalized.nama,
+                    nik: normalized.nik,
+                    pekerjaan: normalized.pekerjaan,
+                    penghasilan: normalized.penghasilan,
+                    riwayatPembayaran: normalized.riwayatPembayaran,
+                    jumlahTanggungan: normalized.jumlahTanggungan,
+                },
+            });
+        } catch (error: any) {
+            if (error?.code === 'P2002' && error?.meta?.target?.includes('nik')) {
+                throw new BadRequestException('NIK sudah terdaftar. Gunakan NIK yang berbeda.');
+            }
+            throw error;
+        }
     }
 
     async findAllPaginated(
