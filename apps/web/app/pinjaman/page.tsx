@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import {
   PlusCircle,
   ShieldCheck,
@@ -115,6 +116,7 @@ const summaryRows = [
 ]
 
 export default function PinjamanPage() {
+  const pathname = usePathname()
   const [selectedNasabah, setSelectedNasabah] = useState<NasabahDetail | null>(null)
   const [isPengajuanOpen, setIsPengajuanOpen] = useState(false)
   const [isAllPengajuanOpen, setIsAllPengajuanOpen] = useState(false)
@@ -456,11 +458,34 @@ export default function PinjamanPage() {
     }
   }
 
+  const getRiskBadgeClass = (risk: string) => {
+    if (risk === 'Rendah') return 'bg-emerald-50 text-emerald-700'
+    if (risk === 'Sedang') return 'bg-amber-50 text-amber-700'
+    return 'bg-red-50 text-red-700'
+  }
+
   const renderRiskBadge = (risk: string) => {
-    const base = 'rounded-full px-2.5 py-0.5 text-xs font-semibold'
-    if (risk === 'Rendah') return `${base} bg-green-50 text-green-600`
-    if (risk === 'Sedang') return `${base} bg-yellow-50 text-yellow-600`
-    return `${base} bg-red-50 text-red-600`
+    return (
+      <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold ${getRiskBadgeClass(risk)}`}>
+        <span className={`inline-flex h-2 w-2 rounded-full ${risk === 'Rendah' ? 'bg-emerald-600' : risk === 'Sedang' ? 'bg-amber-500' : 'bg-red-600'}`} />
+        {risk}
+      </span>
+    )
+  }
+
+  const getRecommendationClass = (recommendation: string) => {
+    if (recommendation === 'Approve') return 'bg-emerald-50 text-emerald-700'
+    if (recommendation === 'Review') return 'bg-slate-100 text-slate-600'
+    return 'bg-red-50 text-red-700'
+  }
+
+  const renderRecommendation = (recommendation: string) => {
+    return (
+      <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold ${getRecommendationClass(recommendation)}`}>
+        <span className={`inline-flex h-2 w-2 rounded-full ${recommendation === 'Approve' ? 'bg-emerald-600' : recommendation === 'Review' ? 'bg-slate-500' : 'bg-red-600'}`} />
+        {recommendation}
+      </span>
+    )
   }
 
   const formatCurrency = (value: number) =>
@@ -503,147 +528,176 @@ export default function PinjamanPage() {
   const nasabahInfo = selectedNasabah!
 
   return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8 text-slate-900">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <header className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-900">Pinjaman</h2>
-          <p className="mt-2 text-slate-500">Kelola pengajuan, analisis risiko, dan pembayaran pinjaman</p>
-        </header>
+    <div className="min-h-screen bg-[#edf1f1] text-slate-900">
+      <div className="flex min-h-screen">
+        <aside className="flex w-[260px] flex-col border-r border-[#dde4e2] bg-white px-6 py-6">
+          <div className="mb-10 flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0f8c7b] shadow-sm">
+              <div className="h-4 w-4 rounded-md bg-white/90" />
+            </div>
+            <div className="text-[1.05rem] font-bold text-slate-900">Simpan Pinjam</div>
+          </div>
 
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          {actionCards.map((card) => {
-            const Icon = card.icon
-            return (
-              <div key={card.title}>
-                {card.href ? (
-                  <Link
-                    href={card.href}
-                    className="group flex items-start space-x-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm font-semibold text-slate-900">{card.title}</p>
-                      <p className="mt-1 text-xs text-slate-500">{card.description}</p>
-                    </div>
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={openPengajuanModal}
-                    className="group flex items-start space-x-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm font-semibold text-slate-900">{card.title}</p>
-                      <p className="mt-1 text-xs text-slate-500">{card.description}</p>
-                    </div>
-                  </button>
-                )}
+          <nav className="flex flex-1 flex-col gap-2">
+            {[
+              { label: 'Dashboard', href: '/' },
+              { label: 'Simpanan', href: '/simpanan' },
+              { label: 'Pinjaman', href: '/pinjaman' },
+              { label: 'Laporan', href: '/laporan' },
+            ].map((item) => {
+              const isActive = item.href === '/' ? pathname === '/' : pathname === item.href || pathname.startsWith(item.href)
+
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center rounded-xl px-4 py-3 text-left text-[1.05rem] font-medium transition ${
+                    isActive ? 'bg-[#dff3ef] text-[#0f766e] shadow-sm' : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          <div className="mt-8 flex items-center gap-3 border-t border-slate-200 pt-5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-300 text-sm font-semibold text-slate-700">
+              DA
+            </div>
+            <div>
+              <div className="text-[0.98rem] font-bold text-slate-900">Data Analyst</div>
+              <div className="text-sm text-slate-500">admin@koperasi.id</div>
+            </div>
+          </div>
+        </aside>
+
+        <main className="flex-1 px-8 py-8">
+          <div className="mx-auto max-w-[1200px]">
+            <header className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <div className="text-sm font-medium text-slate-500">Sistem / Pinjaman</div>
+                <h1 className="mt-2 text-[2.2rem] font-extrabold leading-tight tracking-[-0.04em] text-slate-900">
+                  Kelola Pinjaman
+                </h1>
+                <p className="mt-2 text-lg text-slate-500">Analisis pengajuan, pantau tunggakan, dan kelola portofolio pinjaman</p>
               </div>
-            )
-          })}
-        </section>
 
-        <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <h3 className="text-lg font-bold text-slate-900">Pengajuan Terbaru</h3>
-              <button
-                type="button"
-                onClick={() => pengajuanList[0] && openModal(pengajuanList[0])}
-                disabled={pengajuanList.length === 0}
-                className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-              >
-                <User className="h-4 w-4" />
-                Data Nasabah
-              </button>
-            </div>
+              <div className="flex items-center gap-3">
+                <button type="button" className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                  Export Data
+                </button>
+                <button type="button" onClick={openPengajuanModal} className="rounded-xl bg-[#0f8c7b] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0d766a]">
+                  + Pengajuan Baru
+                </button>
+              </div>
+            </header>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm text-slate-700">
-                <thead>
-                  <tr>
-                    <th className="border-b border-slate-100 px-3 py-3 text-xs uppercase tracking-wide text-slate-400">Nama Nasabah</th>
-                    <th className="border-b border-slate-100 px-3 py-3 text-xs uppercase tracking-wide text-slate-400">Jumlah Pinjaman</th>
-                    <th className="border-b border-slate-100 px-3 py-3 text-xs uppercase tracking-wide text-slate-400">Tenor</th>
-                    <th className="border-b border-slate-100 px-3 py-3 text-xs uppercase tracking-wide text-slate-400">Status Risk</th>
-                    <th className="border-b border-slate-100 px-3 py-3 text-xs uppercase tracking-wide text-slate-400">Rekomendasi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {pengajuanList.length === 0 && !isLoading ? (
+            <section className="mb-8 rounded-[20px] border border-slate-200 bg-white p-5 shadow-[0_1px_0_rgba(15,23,42,0.04)]">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Periode Pengajuan</label>
+                  <input className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none" value="01 Mei 2025 - 31 Mei 2025" readOnly />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Status Pinjaman</label>
+                  <select className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none">
+                    <option>Semua Status</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Tenor</label>
+                  <select className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none">
+                    <option>Semua Tenor</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Tingkat Risiko</label>
+                  <div className="flex gap-2">
+                    {['Rendah','Sedang','Tinggi'].map((risk) => (
+                      <button
+                        key={risk}
+                        type="button"
+                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                          risk === 'Rendah'
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                            : 'border-slate-200 bg-white text-slate-500'
+                        }`}
+                      >
+                        {risk}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-[0_1px_0_rgba(15,23,42,0.04)]">
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <h2 className="text-[1.1rem] font-extrabold text-slate-900">Daftar Nasabah Pinjaman</h2>
+                <div className="text-sm text-slate-500">Menampilkan 5 dari 125 data</div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm text-slate-700">
+                  <thead>
                     <tr>
-                      <td colSpan={5} className="px-3 py-4 text-center text-slate-500">
-                        {fetchError ? fetchError : 'Tidak ada data pinjaman.'}
-                      </td>
+                      <th className="px-3 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">ID / Nasabah</th>
+                      <th className="px-3 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Pekerjaan</th>
+                      <th className="px-3 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Jumlah Pinjaman</th>
+                      <th className="px-3 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Tenor</th>
+                      <th className="px-3 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Risiko</th>
+                      <th className="px-3 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Status Pengajuan</th>
+                      <th className="px-3 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Aksi</th>
                     </tr>
-                  ) : (
-                    pengajuanList.map((row, index) => {
-                      const rekomendasiColor = row.rekomendasi === 'Approve'
-                        ? 'text-blue-600'
-                        : row.rekomendasi === 'Review'
-                          ? 'text-slate-500'
-                          : 'text-red-600'
-                      return (
-                        <tr
-                          key={`${row.id}-${row.nik}-${index}`}
-                          className="cursor-pointer transition hover:bg-slate-50"
-                          onClick={() => openModal(row)}
-                        >
-                          <td className="px-3 py-4 font-medium text-slate-900">{row.nama}</td>
-                          <td className="px-3 py-4">{formatCurrency(row.jumlah)}</td>
-                          <td className="px-3 py-4">{row.tenor}</td>
-                          <td className="px-3 py-4">
-                            <span className={renderRiskBadge(row.risiko)}>{row.risiko}</span>
+                  </thead>
+                  <tbody>
+                    {pengajuanList.length === 0 && !isLoading ? (
+                      <tr>
+                        <td colSpan={7} className="px-3 py-5 text-center text-slate-500">
+                          {fetchError ? fetchError : 'Tidak ada data pinjaman.'}
+                        </td>
+                      </tr>
+                    ) : (
+                      (pengajuanList.slice(0, 5)).map((row, index) => (
+                        <tr key={`${row.id}-${row.nik}-${index}`} className="bg-white shadow-sm ring-1 ring-slate-100 hover:bg-slate-50">
+                          <td className="rounded-l-xl px-3 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-[0.75rem] font-semibold text-slate-700">
+                                {row.nama
+                                  .split(' ')
+                                  .slice(0, 2)
+                                  .map((part) => part[0])
+                                  .join('')
+                                  .slice(0, 2)
+                                  .toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="font-semibold text-slate-900">{row.nama}</div>
+                                <div className="text-xs text-slate-500">{row.nik || row.rekening || 'L-20250510-001'}</div>
+                              </div>
+                            </div>
                           </td>
-                          <td className={`px-3 py-4 font-semibold ${rekomendasiColor}`}>{row.rekomendasi}</td>
+                          <td className="px-3 py-4">{row.pekerjaan || 'Wiraswasta'}</td>
+                          <td className="px-3 py-4 font-semibold text-slate-900">{formatCurrency(row.jumlah || 0)}</td>
+                          <td className="px-3 py-4">{row.tenor ? `${row.tenor} bln` : '12 bln'}</td>
+                          <td className="px-3 py-4">{renderRiskBadge(row.risiko || 'Rendah')}</td>
+                          <td className="px-3 py-4">{renderRecommendation(row.rekomendasi || 'Approve')}</td>
+                          <td className="rounded-r-xl px-3 py-4">
+                            <button type="button" onClick={() => openModal(row)} className="text-sm font-semibold text-slate-600 hover:text-slate-900">Detail</button>
+                          </td>
                         </tr>
-                      )
-                    }))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="mt-6">
-              <button
-                type="button"
-                onClick={openAllPengajuanModal}
-                className="text-sm font-semibold text-blue-600 transition hover:text-blue-800"
-              >
-                Lihat semua pengajuan →
-              </button>
-            </div>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
           </div>
-
-          <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
-            <h3 className="mb-6 text-lg font-bold text-slate-900">Ringkasan Pinjaman</h3>
-            <div className="space-y-3">
-              {summaryRows.map((row) => {
-                const Icon = row.icon
-                return (
-                  <button
-                    key={row.label}
-                    type="button"
-                    onClick={() => showSummaryInfo(row.label)}
-                    className="flex w-full items-center justify-between rounded-lg p-3 transition hover:bg-slate-50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${row.iconBg} ${row.iconText}`}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <span className="text-sm font-medium text-slate-700">{row.label}</span>
-                    </div>
-                    <span className="font-bold text-slate-900">{row.value}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        </section>
+        </main>
       </div>
 
       {selectedNasabah ? (
@@ -1659,7 +1713,10 @@ export default function PinjamanPage() {
                           <td className="px-3 py-4">{formatCurrency(row.jumlah)}</td>
                           <td className="px-3 py-4">{row.tenor}</td>
                           <td className="px-3 py-4">
-                            <span className={renderRiskBadge(row.risiko)}>{row.risiko}</span>
+                            <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold ${getRiskBadgeClass(row.risiko)}`}>
+                              <span className={`inline-flex h-2 w-2 rounded-full ${row.risiko === 'Rendah' ? 'bg-emerald-600' : row.risiko === 'Sedang' ? 'bg-amber-500' : 'bg-red-600'}`} />
+                              {row.risiko}
+                            </span>
                           </td>
                           <td className={`px-3 py-4 font-semibold ${rekomendasiColor}`}>{row.rekomendasi}</td>
                         </tr>

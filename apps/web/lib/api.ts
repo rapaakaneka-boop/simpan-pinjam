@@ -24,6 +24,32 @@ async function parseResponseBody(res: Response) {
   return hasJsonBody ? await res.json().catch(() => null) : await res.text().catch(() => null)
 }
 
+async function attemptDevLogin() {
+  const loginRes = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(DEV_ADMIN_CREDENTIALS),
+  })
+
+  const loginBody = await parseResponseBody(loginRes)
+  const loginToken = loginBody?.token || loginBody?.access_token
+
+  if (loginRes.ok && loginToken) {
+    setToken(loginToken)
+    return loginToken
+  }
+
+  return null
+}
+
+async function initializeAdminUser() {
+  const initRes = await fetch(`${API_BASE_URL}/auth/initialize`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  return initRes.ok
+}
+
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const token = getToken()
   const headers = new Headers(options.headers)
@@ -40,19 +66,18 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   let responseBody = await parseResponseBody(res)
 
-  if (res.status === 401 && endpoint !== '/auth/login' && process.env.NODE_ENV !== 'production') {
+  const shouldAutoLogin = endpoint !== '/auth/login' && (process.env.NODE_ENV !== 'production' || API_BASE_URL.includes('localhost'))
+
+  if (res.status === 401 && shouldAutoLogin) {
     try {
-      const loginRes = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(DEV_ADMIN_CREDENTIALS),
-      })
+      let loginToken = await attemptDevLogin()
 
-      const loginBody = await parseResponseBody(loginRes)
-      const loginToken = loginBody?.token || loginBody?.access_token
+      if (!loginToken) {
+        await initializeAdminUser()
+        loginToken = await attemptDevLogin()
+      }
 
-      if (loginRes.ok && loginToken) {
-        setToken(loginToken)
+      if (loginToken) {
         headers.set('Authorization', `Bearer ${loginToken}`)
         res = await fetch(`${API_BASE_URL}${endpoint}`, {
           ...options,
@@ -110,6 +135,8 @@ export const api = {
 
   // Simpanan
   getSimpanan: () => apiFetch('/simpanan'),
+  createSimpanan: (data: any) =>
+    apiFetch('/simpanan', { method: 'POST', body: JSON.stringify(data) }),
   getSimpananByNasabah: (nasabahId: number) =>
     apiFetch(`/simpanan/nasabah/${nasabahId}`),
   getSaldoNasabah: (nasabahId: number) =>
