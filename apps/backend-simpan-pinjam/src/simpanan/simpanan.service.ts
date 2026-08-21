@@ -24,6 +24,18 @@ export class SimpananService {
         }
     }
 
+    private getBungaRateBySaldo(saldo: number): number {
+        if (saldo <= 5_000_000) {
+            return 0;
+        }
+
+        if (saldo > 5_000_000 && saldo <= 20_000_000) {
+            return 0.5;
+        }
+
+        return 0.5;
+    }
+
     /**
      * Get current savings balance for a customer
      */
@@ -65,24 +77,39 @@ export class SimpananService {
             throw new NotFoundException(`Nasabah dengan ID ${createSimpananDto.nasabahId} tidak ditemukan`);
         }
 
-        // Get current balance
         const currentBalance = await this.getCurrentBalance(createSimpananDto.nasabahId);
+        const saldoSetelahSetoran = currentBalance + createSimpananDto.jumlahSetoran;
+        const bungaRate = this.getBungaRateBySaldo(saldoSetelahSetoran);
+        const jenisInterest = (createSimpananDto.jenisInterest || 'flat') as 'flat' | 'efektif';
+        const nominalBunga = bungaRate > 0
+            ? this.calculateInterest(saldoSetelahSetoran, bungaRate, jenisInterest)
+            : 0;
+        const saldoAkhir = saldoSetelahSetoran + nominalBunga;
 
-        // Calculate new balance (deposit adds to balance)
-        const saldoAkhir = currentBalance + createSimpananDto.jumlahSetoran;
-
-        return await this.prisma.simpanan.create({
+        const simpananRecord = await this.prisma.simpanan.create({
             data: {
                 nasabahId: createSimpananDto.nasabahId,
                 jumlahSetoran: createSimpananDto.jumlahSetoran,
-                bungaSimpanan: createSimpananDto.bungaSimpanan || 0,
-                jenisInterest: createSimpananDto.jenisInterest || 'flat',
+                bungaSimpanan: bungaRate,
+                jenisInterest,
                 tanggalSetoran: createSimpananDto.tanggalSetoran || new Date(),
                 saldoAkhir,
                 status: 'aktif',
-                keterangan: createSimpananDto.keterangan,
+                keterangan: createSimpananDto.keterangan || 'Setoran simpanan',
             },
         });
+
+        if (nominalBunga > 0) {
+            await this.prisma.transaksiBunga.create({
+                data: {
+                    simpananId: simpananRecord.id,
+                    nominalBunga,
+                    tanggalTransaksi: new Date(),
+                },
+            });
+        }
+
+        return simpananRecord;
     }
 
     /**
@@ -165,6 +192,17 @@ export class SimpananService {
         });
 
         return simpananRecord;
+    }
+
+    /**
+     * Get all savings records
+     */
+    async findAll(): Promise<ListSimpananDto[]> {
+        return this.prisma.simpanan.findMany({
+            orderBy: {
+                createdAt: 'desc',
+            },
+        }) as Promise<ListSimpananDto[]>;
     }
 
     /**

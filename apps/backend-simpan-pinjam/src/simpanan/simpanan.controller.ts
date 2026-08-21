@@ -32,6 +32,17 @@ export class SimpananController {
     }
 
     /**
+     * Get all savings records
+     * GET /simpanan
+     */
+    @Get()
+    @ApiOperation({ summary: 'Ambil semua data simpanan' })
+    @ApiResponse({ status: 200, description: 'Daftar semua simpanan', type: [ListSimpananDto] })
+    async findAll() {
+        return this.simpananService.findAll();
+    }
+
+    /**
      * Get savings history for a customer (paginated)
      * GET /simpanan/nasabah/:nasabahId
      */

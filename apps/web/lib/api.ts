@@ -1,4 +1,4 @@
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005').replace(/\/$/, '')
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 const DEV_ADMIN_CREDENTIALS = { username: 'admin', password: 'admin123' }
 
 export function getToken(): string | null {
@@ -114,6 +114,8 @@ export const api = {
     apiFetch(`/simpanan/nasabah/${nasabahId}`),
   getSaldoNasabah: (nasabahId: number) =>
     apiFetch(`/simpanan/saldo/${nasabahId}`),
+  getSimpananSummary: (nasabahId: number) =>
+    apiFetch(`/simpanan/summary/${nasabahId}`),
 
   // Analisis
   getAnalisisPekerjaan: () => apiFetch('/analisis-pekerjaan'),
